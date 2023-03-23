@@ -1,6 +1,6 @@
 # chatos
 
-chatos is a toy application allow ChatGPT to semi-control your PC.
+chatos is a toy application allow ChatGPT to semi-control your OS.
 
 **これは実験的なアプリケーションです。決してパブリックな環境で動かさないでください。**
 
