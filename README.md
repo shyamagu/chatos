@@ -16,4 +16,4 @@ YOUR_OS={os name that this app is ruuning}
 ```
 3. yarn install
 4. node app.js
-
+5. access to http://localhost:3000
