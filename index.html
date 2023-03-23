@@ -1,0 +1,356 @@
+<html lang="ja">
+    <head>
+        <script src="https://unpkg.com/vue@next"></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Makaseta</title>
+        <style>
+            body{
+                background-color: #ccc;
+            }
+            .header{
+                height:90px;
+                text-align: center;
+                padding-top: 10px;
+                background: linear-gradient(to right, #333333, #666666);
+                border: 2px solid #999999;
+                box-shadow: inset -2px -2px 4px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3);
+                color: #aaa;
+            }
+            .container{ 
+                display: flex;
+            }
+            .left_container{
+                display: flex;
+                flex-direction: column;
+                width:50%;
+                min-width: 450px;
+                height:calc(100vh - 175px);
+            }
+            .left{
+                width:100%;
+                height: calc(100vh - 325px);
+                overflow-y: scroll;
+                background-color: #ccc;
+            }
+            .message_by_user{
+                width:90%;
+                margin-right: auto;
+                margin-left:5px;
+                margin-top:20px;
+                padding: 10px 10px;
+                background-color: beige;
+                box-shadow: 2px 2px 4px gray; 
+                font-size: 16px;
+                word-break: break-all;
+            }
+            .message_by_assistant{
+                width:90%;
+                margin-right:5px;
+                margin-left: auto;
+                margin-top:20px;
+                padding: 10px 5px;
+                background-color: antiquewhite;
+                box-shadow: 2px 2px 4px gray; 
+                font-size: 16px;
+                word-break: break-all;
+            }
+            .message_by_process{
+                width:90%;
+                margin-right:5px;
+                margin-left: auto;
+                margin-top:20px;
+                padding: 10px 5px;
+                background-color: #666;
+                box-shadow: 2px 2px 4px gray; 
+                font-size: 16px;
+                color:white;
+                word-break: break-all;
+            }
+            .left_textarea{ 
+                height:150px; 
+                width:100%;
+                background-color: black;
+                display: flex;
+            }
+            .message_box{
+                width:75%;
+                height:calc(100% - 10px);
+                margin: auto;
+                margin-left: 5px;
+                margin-top: 5px;
+                margin-bottom: 5px;
+                font-size: 20px;
+            }
+            .message_button{
+                width:25%;
+                height:calc(100% - 10px);
+                margin: auto;
+                margin-right: 5px;
+                margin-top: 5px;
+                margin-bottom: 5px;
+                font-size:20px;
+            }
+            .right_container{
+                display: flex;
+                flex-direction: column;
+                width:50%;
+                min-width: 450px;
+                height:calc(100vh - 175px);
+            }
+            .right{
+                height:calc(100vh - 325px);
+                width:100%;
+                overflow-y: scroll;
+                background-color: #ccc;
+            }
+            .right_textarea{ 
+                height:150px; 
+                width:100%;
+                background-color: black;
+                display: flex;
+            }
+            .command_field{
+                display: flex;
+            }
+            .command_box_wait{
+                width:70%;
+                background-color: black;
+                color: white;
+                margin-top:10px;
+                margin-left: 10px;
+                padding-left:10px;
+                word-break: break-all;
+            }
+            .command_box_done{
+                width:70%;
+                background-color: #666;
+                color: #ccc;
+                margin-top:10px;
+                margin-left: 10px;
+                padding-left:10px;
+                word-break: break-all;
+            }
+            .command_box_result{
+                width:70%;
+                background-color: black;
+                color: #ccc;
+                margin-top:10px;
+                margin-left: auto;
+                padding-left:10px;
+                word-break: break-all;
+            }
+            .command_button{
+                width:15%;
+                margin-top:10px;
+            }
+            .clear_button{
+                font-size: 20px;
+                margin:5px;
+            }
+            .footer{
+                height:50px;
+                background: linear-gradient(to right, #333333, #666666);
+                border: 2px solid #999999;
+                box-shadow: inset -2px -2px 4px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3);
+                color: #faa;
+            }
+            .loader {
+                margin: auto;
+                margin-top: 10px;
+                width: 50px; 
+                height: 50px; 
+                border-radius: 50%;
+                border: 5px solid #ccc;
+                border-top-color: #333;
+                animation: spin 1s linear infinite; 
+            }
+            @keyframes spin { from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); } }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+        <div class="header">
+            <h2>ChatGPT assists you with your machine</h2>
+        </div>
+        <div class="container">
+            <div class="left_container">
+                <div class="left">
+                    <div v-for="message in messages" :class="['message_by_' + message.by]">
+                        {{message.message}}
+                    </div>
+                    <div v-if="waitingForChatGpt" class="loader"></div>
+                </div>
+                <div class="left_textarea">
+                    <textarea title="message box" name="ask" autocomplete="off" v-model="message" class="message_box" placeholder="何でも聞いてください"></textarea>
+                    <button @click="send" class="message_button">送信</button>
+                </div>
+            </div>
+            <div class="right_container">
+                <div class="right">
+                    <div v-for="command in commands" class="command_field">
+                            <div v-if="command.status !== 'result'" :class="['command_box_' + command.status]">
+                                {{command.command}}
+                            </div>
+                            <button v-if="command.status !== 'result'" @click="execute(command)" class="command_button">実行</button>
+                            <button v-if="command.status !== 'result'" @click="reject(command)" class="command_button">拒否</button>
+                            <div v-if="command.status === 'result'" :class="['command_box_' + command.status]">
+                                {{command.command}}
+                            </div>
+                            <button v-if="command.status === 'result'" @click="copyfrom(command.command)" class="command_button">←</button>
+                    </div>
+                    <div v-if="waitingForProcess" class="loader"></div>
+                </div>
+                <div class="right_textarea">
+                    <textarea title="command box" name="exec" autocomplete="off" v-model="command" class="message_box" placeholder="補足的に実行したいコマンドを入力してください"></textarea>
+                    <button @click="execByMe" class="message_button">実行</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <button class="clear_button" @click="clearChat()">会話履歴をクリアする</button>
+            <button class="clear_button" @click="clearCommand()">コマンド履歴をクリアする</button>
+            {{this.error}}
+        </div>
+        </div>
+
+        <script>
+            // vue のインスタンスを作る
+            const app = Vue.createApp({
+            setup(){
+                const {onUpdated} = Vue;
+
+                const scrollBottom = () =>{
+                    const leftContainer = document.querySelector(".left");
+                    if(leftContainer){
+                        const height = leftContainer.scrollHeight;
+                        leftContainer.scrollTo(0, height);
+                    }
+
+                    const rightContainer = document.querySelector(".right");
+                    if(rightContainer){
+                        const height = rightContainer.scrollHeight;
+                        rightContainer.scrollTo(0, height);
+                    }
+
+                }
+
+                onUpdated(scrollBottom);
+
+                return {};
+            },
+            data() {
+                return {
+                id:0,
+                message: '',
+                command:'',
+                error: '',
+                messages: [],
+                commands: [],
+                waitingForChatGpt: false,
+                waitingForProcess: false,
+                }
+            },
+            methods: {
+                callChatGPT:function() {
+                fetch('/chatgpt', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                    messages:this.messages.slice(-10)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const returnMessage = data.message
+                    this.messages.push({message:returnMessage, by:"assistant", id:this.id++})
+                    this.message='';
+                    this.waitingForChatGpt=false;
+
+                    const regex = /CHATGPT_OS_COMMAND:(.*)($|\n)/;
+                    const result = returnMessage.match(regex);
+
+                    if(result && result[1]){
+                        this.commands.push({command:result[1],status:"wait"})
+                    }
+                })
+                .catch(error => {
+                    this.error = error.message;
+                    this.waitingForChatGpt=false;
+                });
+                },
+                send: function() {
+                    this.waitingForChatGpt=true;
+                    this.error = '';
+
+                    this.messages.push({message:this.message, by:"user", id:this.id++})
+
+                    this.callChatGPT();
+                },
+                copyfrom: function(commandResult) {
+                    this.waitingForChatGpt=true;
+                    this.error = '';
+
+                    this.messages.push({message:commandResult, by:"user", id:this.id++})
+
+                    this.callChatGPT();
+                },
+                execByMe: function(){
+                    let addCommand = {command:this.command,status:"wait"};
+                    this.commands.push(addCommand)
+
+                    this.execute(addCommand)
+
+                    this.command =''
+
+                },
+                execute: function(command){
+                    this.waitingForProcess=true;
+
+                    command.status = "done"
+                    fetch('/execute', {
+                        method: 'POST',
+                        headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                        command:command.command
+                    })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        //直接コマンド実行結果をChatGPT入力とする場合、
+                        //this.messages.push({message:data.output, by:"user", id:this.id++})
+                        //this.callChatGPT()
+
+                        //コマンド実行結果を一時的に表示して、判断する
+                        this.commands.push({command:data.output,status:"result"})
+                        this.waitingForProcess=false;
+                    })
+                    .catch(error => {
+                        this.error = error.message;
+                        this.waitingForProcess=false;
+                    });
+                },
+                reject: function(command){
+                    command.status = "done"
+                    this.messages.push({message:"そのコマンドは実行すると、応答がないか、拒絶されます。", by:"user", id:this.id++})
+                    this.callChatGPT()
+                },
+                clearChat: function(){
+                    this.messages = [];
+                    this.id = 0;
+                },
+                clearCommand: function(){
+                    this.commands = [];
+                }
+            }
+            });
+        
+            app.mount('#app');
+        </script>
+    </body>
+</html>
