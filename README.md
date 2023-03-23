@@ -3,6 +3,7 @@
 chatos is a toy application allow ChatGPT to semi-control your PC.
 
 **これは実験的なアプリケーションです。決してパブリックな環境で動かさないでください。**
+
 **This application is an experimental one, DO NOT run this app on the public network.**
 
 ## How to run
