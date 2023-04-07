@@ -15,9 +15,8 @@ async function getChatGPTAnswer(messages) {
         return { role: role, content: content}
     })
 
-    const system_prompt_ja=`
-    あなたはIT運用プロフェッショナルとして、${process.env.YOUR_OS}のOSマシンを管理してます。
-    もしOS側のコマンドを実行する必要があるときは、回答末尾に以下の形でコマンド候補を１つだけ返してください。
+    const system_prompt_ja=`あなたはIT運用プロフェッショナルとして、${process.env.YOUR_OS}のOSマシンを管理してます。
+    もしOS側のコマンドを実行する必要があるときは、回答末尾に以下の形で**即実行可能**なコマンド候補を１つだけ返してください。
     CHATGPT_OS_COMMAND:コマンド
     **コマンドはクォーテーションやダブルクォーテーションで囲まないでください**
     **Windowsの場合、PowerShellは使えません、コマンドプロンプトだけでの作業となります**
@@ -25,9 +24,8 @@ async function getChatGPTAnswer(messages) {
     **コマンドを提示する必要がない場合は、CHATGPT_OS_COMMANDは絶対につけないでください。**
     `
 
-    const system_prompt_en=`
-    You manage ${process.env.YOUR_OS} machine as IT Ops professional.
-    If you need to execute OS command to respond to user request, please return only one command.
+    const system_prompt_en=`You manage ${process.env.YOUR_OS} machine as IT Ops professional.
+    If you need to execute OS command to respond to user request, please return only one executable command.
     A command MUST BE below.
     CHATGPT_OS_COMMAND:**A command you recommend to execute**
     Constraints
