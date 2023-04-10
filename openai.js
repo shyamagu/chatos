@@ -33,6 +33,9 @@ async function getChatGPTAnswer(messages) {
      - **You CANNOT use Powershell Command like Get-xx if you manage Windows OS.**
      - **"CHATGPT_OS_COMMAND:A command" reccomendation MUSB BE the end of your reply if command needed.**
      - Your replay must be in Japanese.
+
+    User) How about machine's memory?
+    You) CHATGPT_OS_COMMAND:wmic ComputerSystem get TotalPhysicalMemory
     `
 
     const system_prompt = system_prompt_en
